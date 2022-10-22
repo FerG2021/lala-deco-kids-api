@@ -24,7 +24,7 @@ class ProductController extends Controller
         $productosDB = collect();
 
         foreach ($productos as $producto) {
-            $pathToFile = storage_path("app/public/imagenes/" . $producto->image);
+            $pathToFile = storage_path("imagenes/" . $producto->image);
             
             $listaDevolver = [
                 'codeProduct' => $producto->codeProduct,
@@ -36,7 +36,9 @@ class ProductController extends Controller
                 'cantStockMinProduct' => $producto->cantStockMinProduct,
                 'uuid' => $producto->uuid,
                 'image' => $producto->image,
-                'imageURL' => $pathToFile,
+                // 'imageURL' => $pathToFile,
+                'imageURL' => env('IMAGE_URL') . "/storage/imagenes/" . $producto->image,
+
             ];
 
             $productosDB->push($listaDevolver);
