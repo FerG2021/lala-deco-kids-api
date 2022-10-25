@@ -27,6 +27,7 @@ class ProductController extends Controller
             $pathToFile = storage_path("imagenes/" . $producto->image);
             
             $listaDevolver = [
+                'id' => $producto->id,
                 'codeProduct' => $producto->codeProduct,
                 'nameProduct' => $producto->nameProduct,
                 'priceSaleProduct' => $producto->priceSaleProduct,
@@ -116,6 +117,37 @@ class ProductController extends Controller
 
             return response()->json($respuesta, 200);
         }
+    }
+
+    //
+    // Obtener datos de un producto
+    //
+    public function getDatos($id){
+
+        $productoDB = Product::findOrFail($id);
+
+        if ($productoDB != null) {
+
+            $producto = [
+                'codeProduct' => $productoDB->codeProduct,
+                'nameProduct' => $productoDB->nameProduct,
+                'priceSaleProduct' => $productoDB->priceSaleProduct,
+                'porcPriceTrustProduct' => $productoDB->porcPriceTrustProduct,
+                'priceTrustProduct' => $productoDB->priceTrustProduct,
+                'cantStockProduct' => $productoDB->cantStockProduct,
+                'cantStockMinProduct' => $productoDB->cantStockMinProduct,
+                'uuid' => $productoDB->uuid,
+                'image' => env('IMAGE_URL') . "/storage/imagenes/" . $productoDB->image,
+            ];
+            
+
+            $respuesta = APIHelpers::createAPIResponse(true, 200, 'Producto encontrado con éxito', $producto);
+
+            return response()->json($respuesta, 200);
+        } else {
+
+        }
+
     }
 
     /**

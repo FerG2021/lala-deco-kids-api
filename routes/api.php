@@ -56,6 +56,7 @@ Route::group(['middleware' => ['web']], function () {
     // PRODUCTOS
     Route::post('/producto/crear', [ProductController::class,'crear']);
     Route::get('/producto/obtenerTodos', [ProductController::class,'getTodos']);
+    Route::get('/producto/obtenerDatos/{id}', [ProductController::class,'getDatos']);
 
 
 
