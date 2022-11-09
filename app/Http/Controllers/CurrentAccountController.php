@@ -110,6 +110,7 @@ class CurrentAccountController extends Controller
 
                 $cuentaCorrienteDetalleDB->idCurrentAccount = $cuentaCorrienteDB->id;
                 $cuentaCorrienteDetalleDB->idClient = $request->id;
+                $cuentaCorrienteDetalleDB->idsale = 0;
                 $cuentaCorrienteDetalleDB->date = $now;
                 $cuentaCorrienteDetalleDB->typemovement = 1;
                 $cuentaCorrienteDetalleDB->pay = $request->montoPagado;
