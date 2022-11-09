@@ -115,7 +115,7 @@ class CurrentAccountController extends Controller
                 $cuentaCorrienteDetalleDB->pay = $request->montoPagado;
                 $cuentaCorrienteDetalleDB->sale = 0;
 
-                if ($cuentaCorrienteDB->save()) {
+                if ($cuentaCorrienteDetalleDB->save()) {
                     $respuesta = APIHelpers::createAPIResponse(false, 200, 'Datos encontrados con éxito', 'Pago procesado con éxito');
 
                     return response()->json($respuesta, 200);
