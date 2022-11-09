@@ -6,7 +6,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Helpers\APIHelpers;
+use Illuminate\Support\Facades\Storage;
 use Validator, Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 
@@ -24,6 +26,7 @@ class ProductController extends Controller
         $productosDB = collect();
 
         foreach ($productos as $producto) {
+            
             $pathToFile = storage_path("imagenes/" . $producto->image);
             
             $listaDevolver = [
@@ -39,6 +42,7 @@ class ProductController extends Controller
                 'image' => $producto->image,
                 // 'imageURL' => $pathToFile,
                 'imageURL' => env('IMAGE_URL') . "/storage/imagenes/" . $producto->image,
+                'codeNameProduct' => $producto->codeProduct . " - " . $producto->nameProduct,
 
             ];
 
@@ -49,6 +53,38 @@ class ProductController extends Controller
 
         return response()->json($respuesta, 200);
         // return $productosDB;
+    }
+
+    //
+    // Obtener datos de un producto
+    //
+    public function getDatos($id){
+
+        $productoDB = Product::findOrFail($id);
+
+        if ($productoDB != null) {
+
+            $producto = [
+                'codeProduct' => $productoDB->codeProduct,
+                'nameProduct' => $productoDB->nameProduct,
+                'priceSaleProduct' => $productoDB->priceSaleProduct,
+                'porcPriceTrustProduct' => $productoDB->porcPriceTrustProduct,
+                'priceTrustProduct' => $productoDB->priceTrustProduct,
+                'cantStockProduct' => $productoDB->cantStockProduct,
+                'cantStockMinProduct' => $productoDB->cantStockMinProduct,
+                'uuid' => $productoDB->uuid,
+                'image' => env('IMAGE_URL') . "/storage/imagenes/" . $productoDB->image,
+                'imageID' => $productoDB->image,
+            ];
+            
+
+            $respuesta = APIHelpers::createAPIResponse(true, 200, 'Producto encontrado con éxito', $producto);
+
+            return response()->json($respuesta, 200);
+        } else {
+
+        }
+
     }
 
     /**
@@ -96,6 +132,7 @@ class ProductController extends Controller
         if ($request->hasFile('imagen')) {
             $form['imagen'] = time() . '_' . $request->file('imagen')->getClientOriginalName();
             $request->file('imagen')->storeAs('imagenes', $form['imagen']);
+
         }
 
         $producto = new Product();
@@ -119,35 +156,86 @@ class ProductController extends Controller
         }
     }
 
-    //
-    // Obtener datos de un producto
-    //
-    public function getDatos($id){
+    // 
+    // ACTUALIZAR DATOS DE UN PRODUCTO
+    // 
+    public function actualizar(Request $request)
+    {
+        $rules = [
+            'codigo' => 'numeric | required',
+            'nombre' => 'string | required',
+            'precioVenta' => 'numeric | required',
+            'procPrecioFiado' => 'numeric | required',
+            'stock' => 'numeric | required',
+            'stockMinimo' => 'numeric | required'
+            // 'repetirContrasena' => 'required|min:8'
 
-        $productoDB = Product::findOrFail($id);
+        ];
 
-        if ($productoDB != null) {
+        $messages = [
+            'codigo.numeric' => 'El codigo es requerido',
+            'nombre.string' => 'El nombre es requerido',
+            'precioVenta.numeric' => 'El precio de venta es requerido',
+            'procPrecioFiado.numeric' => 'El porcentaje del precio de fiado es requerido',
+            'stock.numeric' => 'El stock es requerido',
+            'stockMinimo.numeric' => 'El stock minimo es requerido',
+        ];
 
-            $producto = [
-                'codeProduct' => $productoDB->codeProduct,
-                'nameProduct' => $productoDB->nameProduct,
-                'priceSaleProduct' => $productoDB->priceSaleProduct,
-                'porcPriceTrustProduct' => $productoDB->porcPriceTrustProduct,
-                'priceTrustProduct' => $productoDB->priceTrustProduct,
-                'cantStockProduct' => $productoDB->cantStockProduct,
-                'cantStockMinProduct' => $productoDB->cantStockMinProduct,
-                'uuid' => $productoDB->uuid,
-                'image' => env('IMAGE_URL') . "/storage/imagenes/" . $productoDB->image,
-            ];
-            
+        $validator = Validator::make($request->all(), $rules, $messages);
 
-            $respuesta = APIHelpers::createAPIResponse(true, 200, 'Producto encontrado con éxito', $producto);
+        if ($validator->fails()) {
+            // $estado = 5;
+            // return response()->json([$validator->errors()]);
+
+            $respuesta = APIHelpers::createAPIResponse(true, 400, 'Se ha producido un error', $validator->errors());
 
             return response()->json($respuesta, 200);
-        } else {
 
         }
 
+        $form = $request->all();
+
+        $form['uuid'] = (string) Str::uuid();
+
+        
+
+        $producto = Product::findOrFail($form['id']);
+
+        $producto->codeProduct =  $form['codigo'];
+        $producto->nameProduct =  $form['nombre'];
+        $producto->priceSaleProduct =  $form['precioVenta'];
+        $producto->porcPriceTrustProduct =  $form['procPrecioFiado'];
+        $porc = $form['procPrecioFiado'] / 100;
+        $producto->priceTrustProduct =  ($form['precioVenta'] * $porc) + $form['precioVenta'];
+        $porc = $request->get('porcpricetrust') / 100;
+        $producto->cantStockProduct =  $form['stock'];
+        $producto->cantStockMinProduct =  $form['stockMinimo'];
+        
+
+        if ($request->hasFile('imagen')) {
+            $form['imagen'] = time() . '_' . $request->file('imagen')->getClientOriginalName();
+            $request->file('imagen')->storeAs('imagenes', $form['imagen']);
+
+            $producto->uuid =  $form['uuid'];
+            $producto->image =  $form['imagen'];
+
+        }
+
+        if ($producto->save()) {
+            $respuesta = APIHelpers::createAPIResponse(false, 200, 'Producto actualizado con éxito', $validator->errors());
+
+            return response()->json($respuesta, 200);
+        }
+
+    }
+
+    public function eliminar(Request $request)
+    {
+        $producto = Product::destroy($request->id);
+        
+        $respuesta = APIHelpers::createAPIResponse(false, 200, 'Producto eliminado con exito', $producto);
+
+        return response()->json($respuesta, 200);
     }
 
     /**

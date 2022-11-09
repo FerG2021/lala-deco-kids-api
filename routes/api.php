@@ -6,8 +6,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
-
-
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CurrentAccountController;
 
 
 
@@ -54,23 +55,34 @@ Route::group(['middleware' => ['web']], function () {
     Route::delete('/usuario/eliminar/{id}', [UserController::class,'eliminar']);
 
     // PRODUCTOS
-    Route::post('/producto/crear', [ProductController::class,'crear']);
     Route::get('/producto/obtenerTodos', [ProductController::class,'getTodos']);
+    Route::post('/producto/crear', [ProductController::class,'crear']);
+    Route::post('/producto/actualizar', [ProductController::class,'actualizar']);
     Route::get('/producto/obtenerDatos/{id}', [ProductController::class,'getDatos']);
+
+    // CLIENTES
+    Route::get('/cliente/obtenerTodos', [ClientController::class,'getTodos']);
+
+    // VENTAS
+    Route::get('/venta/obtenerTodos', [SaleController::class,'getTodos']);
+    Route::post('/venta/crear', [SaleController::class,'crear']);
+    Route::get('/venta/obtenerDatos/{id}', [SaleController::class,'getDatos']);
+    Route::get('/venta/exportarPDF/{id}', [SaleController::class,'exportarPDF']);
+
+    // CUENTA CORRIENTE
+    Route::get('/cuentacorriente/obtenerTodos', [CurrentAccountController::class,'getTodos']);
+    Route::get('/cuentacorriente/obtenerDatos/{id}', [CurrentAccountController::class,'getDatos']);
+    Route::post('/cuentacorriente/nuevoPagoCliente', [CurrentAccountController::class,'nuevoPagoCliente']);
+    Route::get('/cuentacorriente/exportarPDF/{id}', [CurrentAccountController::class,'exportarPDF']);
+    Route::get('/cuentacorriente/datosWhatsApp/{id}', [CurrentAccountController::class,'datosWhatsApp']);
+    Route::post('/cuentacorriente/enviarMail', [CurrentAccountController::class,'enviarMail']);
+    
+
+
 
 
 
     
     // MI CUENTA
     Route::get('/mi-cuenta/obtenerDatos/{id}', [LoginController::class,'getDatos']);
-
-
-
-
-
-
-
-    
-
-
 });
