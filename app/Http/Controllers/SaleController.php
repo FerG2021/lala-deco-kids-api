@@ -8,6 +8,7 @@ use App\Models\SaleProduct;
 use App\Models\Product;
 use App\Models\CurrentAccount;
 use App\Models\CurrentAccountDetail;
+use App\Models\Client;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\APIHelpers;
 use Validator, Auth;
@@ -15,6 +16,9 @@ use Validator, Auth;
 use PDF;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+
+use App\Mail\TestMailVenta;
+use Mail;
 
 
 
@@ -368,8 +372,125 @@ class SaleController extends Controller
             }
         }
 
-        return $urlEnviar;
+        $respuesta = APIHelpers::createAPIResponse(false, 200, 'PDF generado con éxito', $urlEnviar);
+
+        return $respuesta;
     }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function datosWhatsApp($id)
+    {
+
+        $saleDB = Sale::where('id', '=', $id)->first();
+
+        $saleProductDB = SaleProduct::where('saleId', '=', $id)->get();
+
+        $objDevolver = [
+            'venta' => $saleDB,
+            'productos' => $saleProductDB,
+        ];
+
+        // obtener los datos del cliente
+        $clienteDB = Client::where('id', '=', $saleDB->idClient)->first();
+
+        $respuesta = APIHelpers::createAPIResponse(false, 200, 'Venta encontrada', $objDevolver);
+
+        // METODO PARA GENERAR, GUARDAR Y MOSTRAR EL PDF
+        $today = Carbon::now()->format('d/m/Y'); // paso datos
+        $pdf = \PDF::loadView('ejemplo',compact('today', 'saleDB', 'saleProductDB'));
+        $content = $pdf->download()->getOriginalContent();
+        $nombreGuardar = 'public/csv/' . time() . '_' . 'ejemplo.pdf';
+        Storage::put($nombreGuardar, $content) ;
+        //  return $pdf->stream('ejemplo.pdf');
+
+
+        $saleDB = Sale::where('id', '=', $id)->first();
+
+        if ($saleDB) {
+            if ($saleDB->urlpdf == null) {
+                $saleDB->urlpdf = 'storage/'.$nombreGuardar;
+                $saleDB->save();
+                $urlEnviar = env('IMAGE_URL'). '/' . 'storage/' . $nombreGuardar;
+            } else {
+                $urlEnviar = env('IMAGE_URL'). '/' .$saleDB->urlpdf;
+            }
+        }
+
+        $objDevolver = [
+            'urlEnviar' => $urlEnviar,
+            'venta' => $saleDB,
+            'ventaproductos' => $saleProductDB,
+            'datosClient' => $clienteDB,
+        ];
+
+        $respuesta = APIHelpers::createAPIResponse(false, 200, 'PDF generado con éxito', $objDevolver);
+
+        return $respuesta;
+    }
+
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function enviarMail(Request $request)
+    {
+        $saleDB = Sale::where('id', '=', $request->id)->first();
+
+        $saleProductDB = SaleProduct::where('saleId', '=', $request->id)->get();
+
+        $objDevolver = [
+            'venta' => $saleDB,
+            'productos' => $saleProductDB,
+        ];
+
+        // obtener los datos del cliente
+        $clienteDB = Client::where('id', '=', $saleDB->idClient)->first();
+
+        $respuesta = APIHelpers::createAPIResponse(false, 200, 'Venta encontrada', $objDevolver);
+
+        // METODO PARA GENERAR, GUARDAR Y MOSTRAR EL PDF
+        $today = Carbon::now()->format('d/m/Y'); // paso datos
+        $pdf = \PDF::loadView('ejemplo',compact('today', 'saleDB', 'saleProductDB'));
+        $content = $pdf->download()->getOriginalContent();
+        $nombreGuardar = 'public/csv/' . time() . '_' . 'ejemplo.pdf';
+        Storage::put($nombreGuardar, $content) ;
+        //  return $pdf->stream('ejemplo.pdf');
+
+
+        $saleDB = Sale::where('id', '=', $request->id)->first();
+
+        if ($saleDB) {
+            if ($saleDB->urlpdf == null) {
+                $saleDB->urlpdf = 'storage/'.$nombreGuardar;
+                $saleDB->save();
+                $urlEnviar = env('IMAGE_URL'). '/' . 'storage/' . $nombreGuardar;
+            } else {
+                $urlEnviar = env('IMAGE_URL'). '/' .$saleDB->urlpdf;
+            }
+        }
+
+        $objEnviarMail = [
+            'nombreCliente' => $clienteDB->nameClient,
+            'urlEnviar' => $urlEnviar,
+            'total' => $saleDB->totalPrice,
+            'ventaproductos' => $saleProductDB,
+        ];
+
+        Mail::to($request->mailCliente)
+            ->send(new TestMailVenta($objEnviarMail, $urlEnviar)); 
+
+        $respuesta = APIHelpers::createAPIResponse(false, 200, 'Mail enviado con éxito', $objEnviarMail);
+
+        return $respuesta;
+    }
+
+
 
     /**
      * Store a newly created resource in storage.

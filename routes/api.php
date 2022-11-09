@@ -68,6 +68,9 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/venta/crear', [SaleController::class,'crear']);
     Route::get('/venta/obtenerDatos/{id}', [SaleController::class,'getDatos']);
     Route::get('/venta/exportarPDF/{id}', [SaleController::class,'exportarPDF']);
+    Route::get('/venta/datosWhatsApp/{id}', [SaleController::class,'datosWhatsApp']);
+    Route::post('/venta/enviarMail', [SaleController::class,'enviarMail']);
+
 
     // CUENTA CORRIENTE
     Route::get('/cuentacorriente/obtenerTodos', [CurrentAccountController::class,'getTodos']);
@@ -76,11 +79,6 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/cuentacorriente/exportarPDF/{id}', [CurrentAccountController::class,'exportarPDF']);
     Route::get('/cuentacorriente/datosWhatsApp/{id}', [CurrentAccountController::class,'datosWhatsApp']);
     Route::post('/cuentacorriente/enviarMail', [CurrentAccountController::class,'enviarMail']);
-    
-
-
-
-
 
     
     // MI CUENTA
