@@ -62,6 +62,10 @@ Route::group(['middleware' => ['web']], function () {
 
     // CLIENTES
     Route::get('/cliente/obtenerTodos', [ClientController::class,'getTodos']);
+    Route::get('/cliente/obtenerDatos/{id}', [ClientController::class,'getDatos']);
+    Route::post('/cliente/crear', [ClientController::class,'crear']);
+    Route::put('/cliente/actualizar/{id}', [ClientController::class,'actualizar']);
+
 
     // VENTAS
     Route::get('/venta/obtenerTodos', [SaleController::class,'getTodos']);
