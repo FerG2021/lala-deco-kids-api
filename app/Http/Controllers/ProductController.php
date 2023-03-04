@@ -162,7 +162,7 @@ class ProductController extends Controller
     public function actualizar(Request $request)
     {
         $rules = [
-            'codigo' => 'numeric | required',
+            'codigo' => 'required',
             'nombre' => 'string | required',
             'precioVenta' => 'numeric | required',
             'procPrecioFiado' => 'numeric | required',

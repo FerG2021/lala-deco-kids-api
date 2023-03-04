@@ -53,7 +53,8 @@ class UserController extends Controller
             $rules = [
                 'nombre' => 'required',
                 'apellido' => 'required',
-                'email' => 'required | unique:App\Models\User,email',
+                // 'email' => 'required | unique:App\Models\User,email',
+                'email' => 'required',
                 'password' => 'required | min: 8',
                 'cpassword' => 'required|same:password|min:8'
                 // 'repetirContrasena' => 'required|min:8'
