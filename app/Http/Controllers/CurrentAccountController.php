@@ -153,8 +153,13 @@ class CurrentAccountController extends Controller
         $pdf = \PDF::loadView('cuentacorriente',compact('today', 'cuentaCorrienteDB', 'cuentaCorrienteDetalleDB'));
         $content = $pdf->download()->getOriginalContent();
         $nombreGuardar = 'public/pdf/' . time() . '_' . 'detalleCuentaCorriente.pdf';
-        Storage::put($nombreGuardar, $content) ;
+        // Storage::put($nombreGuardar, $content) ;
         //  return $pdf->stream('ejemplo.pdf');
+
+        $nuevoNombreGuardar = time() . '_' . 'detalleCuentaCorriente.pdf';
+
+        Storage::putFileAs('public/csv/', $content, $nuevoNombreGuardar);
+
 
 
         $cuentaCorrienteDB = CurrentAccount::where('id', '=', $id)->first();

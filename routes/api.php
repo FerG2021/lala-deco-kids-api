@@ -58,6 +58,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/producto/obtenerTodos', [ProductController::class,'getTodos']);
     Route::post('/producto/crear', [ProductController::class,'crear']);
     Route::post('/producto/actualizar', [ProductController::class,'actualizar']);
+    Route::post('/producto/modificarPrecio', [ProductController::class,'modificarPrecio']);
     Route::get('/producto/obtenerDatos/{id}', [ProductController::class,'getDatos']);
 
     // CLIENTES

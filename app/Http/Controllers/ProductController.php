@@ -41,7 +41,7 @@ class ProductController extends Controller
                 'uuid' => $producto->uuid,
                 'image' => $producto->image,
                 // 'imageURL' => $pathToFile,
-                'imageURL' => env('IMAGE_URL') . "/storage/imagenes/" . $producto->image,
+                'imageURL' => env('IMAGE_URL') . "/storage/public/imagenes/" . $producto->image,
                 'codeNameProduct' => $producto->codeProduct . " - " . $producto->nameProduct,
 
             ];
@@ -73,7 +73,7 @@ class ProductController extends Controller
                 'cantStockProduct' => $productoDB->cantStockProduct,
                 'cantStockMinProduct' => $productoDB->cantStockMinProduct,
                 'uuid' => $productoDB->uuid,
-                'image' => env('IMAGE_URL') . "/storage/imagenes/" . $productoDB->image,
+                'image' => env('IMAGE_URL') . "/storage/public/imagenes/" . $productoDB->image,
                 'imageID' => $productoDB->image,
             ];
             
@@ -131,7 +131,12 @@ class ProductController extends Controller
 
         if ($request->hasFile('imagen')) {
             $form['imagen'] = time() . '_' . $request->file('imagen')->getClientOriginalName();
-            $request->file('imagen')->storeAs('imagenes', $form['imagen']);
+            // $request->file('imagen')->storeAs('imagenes', $form['imagen']);
+
+            $nombreGuardar = 'public/imagenes/' . $form['imagen'];
+            // Storage::put($nombreGuardar, $request->file('imagen'));
+            Storage::putFileAs('public/imagenes/', $request->file('imagen'), $form['imagen']);
+            
 
         }
 
@@ -226,6 +231,47 @@ class ProductController extends Controller
 
             return response()->json($respuesta, 200);
         }
+
+    }
+
+    // 
+    // ACTUALIZAR DATOS DE UN PRODUCTO
+    // 
+    public function modificarPrecio(Request $request)
+    {
+        $rules = [
+            'porcentaje' => 'required',
+        ];
+
+        $messages = [
+            'porcentaje.required' => 'El porcentaje es requerido',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            // $estado = 5;
+            // return response()->json([$validator->errors()]);
+
+            $respuesta = APIHelpers::createAPIResponse(true, 400, 'Se ha producido un error', $validator->errors());
+
+            return response()->json($respuesta, 200);
+        }
+
+        $porcentaje = $request->porcentaje / 100;
+
+        $productosDB = Product::all();
+
+        foreach ($productosDB as $producto) {
+            $producto->priceSaleProduct = ($producto->priceSaleProduct * $porcentaje) + $producto->priceSaleProduct;
+            $producto->priceTrustProduct = ($producto->priceSaleProduct * $producto->porcPriceTrustProduct) +  $producto->priceSaleProduct;
+
+            $producto->save();
+        }
+
+        $respuesta = APIHelpers::createAPIResponse(false, 200, 'Precio de los productos actualizado con éxito', $validator->errors());
+
+        return response()->json($respuesta, 200);
 
     }
 
