@@ -41,7 +41,7 @@ class ProductController extends Controller
                 'uuid' => $producto->uuid,
                 'image' => $producto->image,
                 // 'imageURL' => $pathToFile,
-                'imageURL' => env('IMAGE_URL') . "/storage/public/imagenes/" . $producto->image,
+                'imageURL' => env('IMAGE_URL') . "/storage/imagenes/" . $producto->image,
                 'codeNameProduct' => $producto->codeProduct . " - " . $producto->nameProduct,
 
             ];
@@ -73,7 +73,7 @@ class ProductController extends Controller
                 'cantStockProduct' => $productoDB->cantStockProduct,
                 'cantStockMinProduct' => $productoDB->cantStockMinProduct,
                 'uuid' => $productoDB->uuid,
-                'image' => env('IMAGE_URL') . "/storage/public/imagenes/" . $productoDB->image,
+                'image' => env('IMAGE_URL') . "/storage/imagenes/" . $productoDB->image,
                 'imageID' => $productoDB->image,
             ];
             
@@ -235,7 +235,7 @@ class ProductController extends Controller
     }
 
     // 
-    // ACTUALIZAR DATOS DE UN PRODUCTO
+    // ACTUALIZAR PRECIO DE TODOS LOS PRODUCTOS A LA VEZ
     // 
     public function modificarPrecio(Request $request)
     {
@@ -264,7 +264,10 @@ class ProductController extends Controller
 
         foreach ($productosDB as $producto) {
             $producto->priceSaleProduct = ($producto->priceSaleProduct * $porcentaje) + $producto->priceSaleProduct;
-            $producto->priceTrustProduct = ($producto->priceSaleProduct * $producto->porcPriceTrustProduct) +  $producto->priceSaleProduct;
+            
+            $porcTrust = $producto->porcPriceTrustProduct / 100;
+
+            $producto->priceTrustProduct = ($producto->priceSaleProduct * $porcTrust) + $producto->priceSaleProduct;
 
             $producto->save();
         }

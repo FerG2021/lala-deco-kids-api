@@ -70,6 +70,7 @@ Route::group(['middleware' => ['web']], function () {
 
     // VENTAS
     Route::get('/venta/obtenerTodos', [SaleController::class,'getTodos']);
+    Route::post('/venta/filtrarFecha', [SaleController::class,'filtrarFecha']);
     Route::post('/venta/crear', [SaleController::class,'crear']);
     Route::get('/venta/obtenerDatos/{id}', [SaleController::class,'getDatos']);
     Route::get('/venta/exportarPDF/{id}', [SaleController::class,'exportarPDF']);

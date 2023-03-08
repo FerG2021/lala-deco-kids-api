@@ -27,7 +27,8 @@ class CurrentAccountController extends Controller
      */
     public function getTodos()
     {
-        $cuentasCorrientesDB = CurrentAccount::all();
+        // $cuentasCorrientesDB = CurrentAccount::all();
+        $cuentasCorrientesDB = CurrentAccount::orderBy('updated_at', 'desc')->get();
 
         if ($cuentasCorrientesDB) {
             $respuesta = APIHelpers::createAPIResponse(false, 200, 'Datos encontrados con éxito', $cuentasCorrientesDB);

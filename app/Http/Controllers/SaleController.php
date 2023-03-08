@@ -44,6 +44,48 @@ class SaleController extends Controller
         }
     }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function filtrarFecha(Request $request)
+    {
+        $rules = [
+            'fechaInicio' => 'date | required',
+            'fechaFin' => 'date | required',
+        ];
+
+        $messages = [
+            'fechaInicio.required' => 'La fecha de inicio es requerida',
+            'fechaInicio.date' => 'La fecha de inicio debe ser una fecha',
+            'fechaFin.required' => 'La fecha de fin es requerida',
+            'fechaFin.date' => 'La fecha de fin debe ser una fecha',
+            
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            $respuesta = APIHelpers::createAPIResponse(true, 400, 'Se ha producido un error', $validator->errors());
+
+            return response()->json($respuesta, 200);
+        } 
+
+        $ventas = Sale::orderBy('created_at', 'desc')->whereDate('created_at','>=', $request->fechaInicio)->whereDate('created_at','<=', $request->fechaFin)->get();
+
+        if ($ventas) {
+            $respuesta = APIHelpers::createAPIResponse(false, 200, 'Datos encontrados con éxito', $ventas);
+
+            return response()->json($respuesta, 200);
+            // return $usuarios;
+        } else {
+            return 0;
+        }
+
+        
+    }
+
     // 
     // GUARDAR UNA VENTA
     // 
