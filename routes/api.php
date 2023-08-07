@@ -60,6 +60,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/producto/actualizar', [ProductController::class,'actualizar']);
     Route::post('/producto/modificarPrecio', [ProductController::class,'modificarPrecio']);
     Route::get('/producto/obtenerDatos/{id}', [ProductController::class,'getDatos']);
+    Route::delete('/producto/eliminar/{id}', [ProductController::class,'eliminar']);
 
     // CLIENTES
     Route::get('/cliente/obtenerTodos', [ClientController::class,'getTodos']);
